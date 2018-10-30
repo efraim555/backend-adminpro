@@ -1,0 +1,14 @@
+{
+  "name": "backend-server",
+  "version": "1.0.0",
+  "description": "Servidor backend del adminpro",
+  "scripts": {
+    "start": "node app",
+    "nodemon": "nodemon app"
+  },
+  "dependencies": {
+    "debug": "~2.6.9",
+    "express": "~4.16.0",
+    "mongoose": "^5.3.7"
+  }
+}
