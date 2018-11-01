@@ -7,8 +7,12 @@
     "nodemon": "nodemon app"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.18.3",
     "debug": "~2.6.9",
     "express": "~4.16.0",
-    "mongoose": "^5.3.7"
+    "jsonwebtoken": "^8.3.0",
+    "mongoose": "^5.3.7",
+    "mongoose-unique-validator": "^2.0.2"
   }
 }
