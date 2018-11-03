@@ -7,6 +7,11 @@ const bodyParser = require('body-parser');
 let appRoutes = require('./routes/app');
 let usuarioRoutes = require('./routes/usuario');
 let loginRoutes = require('./routes/login');
+let hospitalRoutes = require('./routes/hospital');
+let medicoRoutes = require('./routes/medico');
+let busquedaRoutes = require('./routes/busqueda');
+let uploadRoutes = require('./routes/upload');
+let imgRoutes = require('./routes/imagen');
 
 //Initialization
 const app = express();
@@ -22,9 +27,20 @@ mongoose.connect('mongodb://localhost:27017/hospitalDB', {useCreateIndex: true, 
     console.log('BD: \x1b[32m%s\x1b[0m', 'online');
 });
 
+//Mostrar recursos de imagenes || OPCIONAL || RESTRICCION
+//Server Index Config
+// const serverIndex = require('serve-index');
+// app.use(express.static(__dirname + '/'));
+// app.use('/uploads', serverIndex(__dirname + '/uploads'));
+
 //Routes
 app.use('/usuario', usuarioRoutes);
 app.use('/login', loginRoutes);
+app.use('/hospital', hospitalRoutes);
+app.use('/medico', medicoRoutes);
+app.use('/busqueda', busquedaRoutes);
+app.use('/upload', uploadRoutes);
+app.use('/img', imgRoutes);
 app.use('/', appRoutes);
 
 //Hear port

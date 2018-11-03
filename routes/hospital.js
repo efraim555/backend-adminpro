@@ -1,10 +1,8 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
-const mdAutentication = require('../middlewares/autentication');
 const app = express();
-const Usuario = require('../models/usuario');
+const mdAutentication = require('../middlewares/autentication');
+const Hospital = require('../models/hospital');
 
-//Get Users
 app.get('/', (req, res, next) => {
 
     let skip = req.query.desde;
@@ -13,47 +11,46 @@ app.get('/', (req, res, next) => {
     skip = Number(skip) || 0;
     limit = Number(limit) || 5;
 
-    Usuario.find({}, 'nombre email img role')
+    Hospital.find({})
         .skip(skip)
         .limit(limit)
-        .exec((err, usuarios) => {
+        .populate('usuario', 'nombre email')
+        .exec((err, hospitales) => {
 
             if (err) {
                 return res.status(500).json({
                     ok: false,
-                    mensaje: 'Error cargando usuarios',
+                    mensaje: 'Error cargando hospitales',
                     errors: err
                 });
             }
 
-            Usuario.count({}, (err, conteo) => {
+            Hospital.count({}, (err, count) => {
                 res.status(200).json({
                     ok: true,
-                    usuarios,
-                    total: conteo
+                    hospitales,
+                    total: count
                 });
             });
         });
 });
 
-//Create User
-app.post('/', mdAutentication.verificaToken, (req, res) => {
+app.post('/', mdAutentication.verificaToken, (req, res, next) => {
 
     let body = req.body;
 
-    let usuario = new Usuario({
+    let hospital = new Hospital({
         nombre: body.nombre,
-        email: body.email,
         img: body.img,
-        role: body.role,
-        password: bcrypt.hashSync(body.password, 10)
+        usuario: req.usuario._id
     });
 
-    usuario.save((err, user) => {
+    hospital.save((err, user) => {
+
         if (err) {
             return res.status(500).json({
                 ok: false,
-                mensaje: 'Error al crear usuario',
+                mensaje: 'Error al crear hospital',
                 errors: err
             });
         }
@@ -65,80 +62,77 @@ app.post('/', mdAutentication.verificaToken, (req, res) => {
     });
 });
 
-//Update User
-app.put('/:id', mdAutentication.verificaToken, (req, res) => {
+app.put('/:id', mdAutentication.verificaToken, (req, res, next) => {
 
     let id = req.params.id;
     let body = req.body;
 
-    Usuario.findById(id, (err, usuario) => {
+    Hospital.findById(id, (err, hospital) => {
 
         if (err) {
             return res.status(500).json({
                 ok: false,
-                mensaje: 'Error al buscar usuario',
+                mensaje: 'Error al buscar hospital',
                 errors: err
             });
         }
 
-        if (!usuario) {
+        if (!hospital) {
             return res.status(400).json({
                 ok: false,
-                mensaje: `El usuario con el id ${id} no existe`,
-                errors: {message: 'No existe un usuario con ese ID'}
+                mensaje: `El hospital con el id ${id} no existe`,
+                errors: {message: 'No existe un usuario con ese id'}
             });
         }
 
-        usuario.nombre = body.nombre;
-        usuario.email = body.email;
-        usuario.role = body.role;
+        hospital.nombre = body.nombre;
+        hospital.img = body.img;
+        hospital.usuario = req.usuario._id;
 
-        usuario.save((err, user) => {
+        hospital.save((err, hospitalDB) => {
 
             if (err) {
-                return res.status(400).json({
+                return res.status(500).json({
                     ok: false,
-                    mensaje: 'Error al actualizar usuario',
+                    mensaje: 'Error al actualizar hospital',
                     errors: err
                 });
             }
 
-            user.password = ':)';
-
             res.status(200).json({
                 ok: true,
-                usuario: user
-            });
+                hospital: hospitalDB
+            })
         });
-    });
+    })
+
 });
 
-//Delete user
-app.delete('/:id', mdAutentication.verificaToken, (req, res) => {
+app.delete('/:id', mdAutentication.verificaToken, (req, res, next) => {
 
     let id = req.params.id;
 
-    Usuario.findOneAndDelete({_id: id}, (err, usuario) => {
+    Hospital.findOneAndDelete({_id: id}, (err, hospital) => {
 
         if (err) {
             return res.status(500).json({
                 ok: false,
-                mensaje: 'Error al borrar usuario',
+                mensaje: 'Error al borrar hospital',
                 errors: err
             });
         }
 
-        if (!usuario) {
+        if (!hospital) {
             return res.status(400).json({
                 ok: false,
-                mensaje: `No existe el usuario con el id ${id}`,
-                errors: {message: 'No existe un usuario con ese id'}
+                mensaje: `No existe un hospital con el id ${id}`,
+                errors: {message: 'No existe un hospital con ese id'}
             });
         }
 
         res.status(200).json({
             ok: true,
-            usuario
+            hospital
         });
     });
 });
